@@ -2,6 +2,7 @@ package com.example.quizapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.MediaController;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -23,8 +25,11 @@ import com.bumptech.glide.Glide;
 import com.example.quizapp.application.ApplicationClass;
 import com.example.quizapp.model.Contest;
 import com.example.quizapp.model.ContestSave;
+import com.example.quizapp.model.QuestionResponseListItem;
 import com.example.quizapp.model.QuestionsItem;
+import com.example.quizapp.model.UserResponse;
 import com.example.quizapp.network.ApiInterFace;
+import com.example.quizapp.network.UserApiInterface;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,13 +45,16 @@ public class MainActivity extends AppCompatActivity {
     private TextView mTextField,questionView,difficultyLevel, marks, imageQuestion, videoQuestion, audioQuestion;
     private Button nextButton;
     private VideoView videoView;
-    private int i=0;
+    List<QuestionResponseListItem> questionResponseListItems = new ArrayList<>();
+    UserResponse userResponse = new UserResponse();
+    private int i=1;
 
     private Contest contest;
     CountDownTimer countDownTimer;
     private MediaController mediaController;
 
     private ApiInterFace apiInterFace;
+    private  UserApiInterface userApiInterface;
 
     private RadioButton option1,option2,option3,option4;
     private RadioGroup radioGroup;
@@ -58,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
     private MediaPlayer mp;
     List<QuestionsItem> listquestions;
+    private ProgressBar progressBar;
 
     long duration;
 
@@ -81,8 +90,9 @@ public class MainActivity extends AppCompatActivity {
         image_linear.setVisibility(View.GONE);
         video_linear.setVisibility(View.GONE);
         audio_linear.setVisibility(View.GONE);
+        //radioGroup.clearCheck();
 
-        this.marks.setText(marks+"points");
+        this.marks.setText(marks+"");
         difficultyLevel.setText(difficulty);
         if(answerType.equals("SINGLE")){
 
@@ -201,6 +211,7 @@ public class MainActivity extends AppCompatActivity {
     {
 
         Log.e("function","inside");
+        progressBar.setVisibility(View.VISIBLE);
         apiInterFace.getById(id).enqueue(
                 new Callback<Contest>() {
                     @Override
@@ -210,11 +221,14 @@ public class MainActivity extends AppCompatActivity {
                             contest = response.body();
                             duration=contest.getDuration();
                             listquestions = contest.getQuestions();
+                            setScreen(listquestions.get(0));
+                            progressBar.setVisibility(View.GONE);
                             Log.i("response", listquestions.toString());
-                           Toast.makeText(MainActivity.this, "got response"+response.body(), Toast.LENGTH_SHORT).show();
+                          // Toast.makeText(MainActivity.this, "got response"+response.body(), Toast.LENGTH_SHORT).show();
                         }else{
                             Toast.makeText(MainActivity.this, "empty response", Toast.LENGTH_SHORT).show();
                             Log.i("response empty", listquestions.toString());
+                            progressBar.setVisibility(View.GONE);
                         }
                     }
 
@@ -222,6 +236,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onFailure(Call<Contest> call, Throwable t) {
                         Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
                         Log.e("error",t.getMessage());
+                        progressBar.setVisibility(View.GONE);
                     }
                 }
         );
@@ -257,12 +272,19 @@ public class MainActivity extends AppCompatActivity {
         imageQuestion = findViewById(R.id.image_text);
         videoQuestion = findViewById(R.id.video_text);
         audioQuestion = findViewById(R.id.audio_text);
+        progressBar=findViewById(R.id.progressBar_main);
+
+        Intent contestIntent=getIntent();
+        contest = (Contest) contestIntent.getSerializableExtra("newContest");
 
         //stop=findViewById(R.id.img_stop);
         mp=new MediaPlayer();
 
         apiInterFace=((ApplicationClass)getApplication()).retrofit.create(ApiInterFace.class);
-        getContest("82dee9ba-e564-4f14-ab2c-bd036e499c60");
+        userApiInterface = ((ApplicationClass) getApplication()).userRetrofit.create(UserApiInterface.class);
+        getContest(contest.getContestId());
+
+
 
         countDownTimer =new CountDownTimer(30000, 1000) {
             public void onTick(long millisUntilFinished) {
@@ -281,16 +303,127 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+//        nextButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//               // obj.cancel();
+//                if(i<listquestions.size()) {
+//                    setScreen(listquestions.get(++i));
+//                }
+//
+//                //obj.start();
+//
+//            }
+//        });
+
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               // obj.cancel();
-                if(i<listquestions.size()) {
-                    setScreen(listquestions.get(i++));
+                List<String> answerList = new ArrayList<>();
+                // obj.cancel();
+                if(i < listquestions.size()) {
+                    setScreen(listquestions.get(i));
+                    if(radioGroup.getVisibility() == View.VISIBLE){
+                        RadioButton radioButton = findViewById(radioGroup.getCheckedRadioButtonId());
+                        answerList.add(radioButton.getText().toString());
+                       // radioButton.setChecked(false);
+                        radioGroup.clearCheck();
+                    }else{
+                        if(chOption1.isChecked()) {
+                            answerList.add(chOption1.getText().toString());
+                            chOption1.setChecked(false);
+                            //radioGroup.clearCheck();
+                        }
+                        else if(chOption2.isChecked()) {
+                            answerList.add(chOption2.getText().toString());
+                           chOption2.setChecked(false);
+                            //radioGroup.clearCheck();
+                        }
+                        else if(chOption3.isChecked()) {
+                            answerList.add(chOption3.getText().toString());
+                            chOption3.setChecked(false);
+                            //radioGroup.clearCheck();
+                        }
+                        else if(chOption4.isChecked()) {
+                            answerList.add(chOption4.getText().toString());
+                            chOption4.setChecked(false);
+                            //radioGroup.clearCheck();
+                        }
+
+
+
+
+
+
+
+                    }
+                    QuestionResponseListItem responseItem = new QuestionResponseListItem();
+                    responseItem.setQuestionId(listquestions.get(i).getQuestionId());
+                    if(listquestions.get(i).getAnswer().equals(answerList)) {
+                        responseItem.setScore(Integer.parseInt(marks.getText().toString()));
+                    }else{
+                        responseItem.setScore(0);
+                    }
+                    questionResponseListItems.add(responseItem);
+                    i++;
+                }else{
+//                    if(radioGroup.getVisibility() == View.VISIBLE){
+//                        RadioButton radioButton = findViewById(radioGroup.getCheckedRadioButtonId());
+//                        answerList.add(radioButton.getText().toString());
+//                        radioButton.setChecked(false);
+//                    }else{
+//                        if(chOption1.isChecked())
+//                        {
+//                            answerList.add(chOption1.getText().toString());
+//                            chOption1.setChecked(false);
+//                        }else if(chOption2.isChecked()){
+//                            answerList.add(chOption2.getText().toString());
+//                            chOption2.setChecked(false);
+//                        } else if(chOption3.isChecked())
+//                        {
+//                            answerList.add(chOption3.getText().toString());
+//                            chOption3.setChecked(false);
+//
+//                        } else if(chOption4.isChecked())
+//                        {
+//
+//                            answerList.add(chOption4.getText().toString());
+//                            chOption4.setChecked(false);
+//                        }
+//                    }
+//                    QuestionResponseListItem responseItem = new QuestionResponseListItem();
+//                    responseItem.setQuestionId(listquestions.get(i-1 ).getQuestionId());
+//                    if(listquestions.get(i-1).getAnswer().equals(answerList)) {
+//                        responseItem.setScore(Integer.parseInt(marks.getText().toString()));
+//                    }else{
+//                        responseItem.setScore(0);
+//                    }
+                    //questionResponseListItems.add(responseItem);
+                    userResponse.setQuestionResponseList(questionResponseListItems);
+                    userResponse.setContestId(contest.getContestId());
+                    userResponse.setUserId("1");
+                    userResponse.setContestStatus("completed");
+                    userResponse.setQuestionResponseList(questionResponseListItems);
+                    userResponse.setTimeStamp(new Date().getTime());
+
+                    userApiInterface.getQuestionResponse(userResponse).enqueue(new Callback<Integer>() {
+                        @Override
+                        public void onResponse(Call<Integer> call, Response<Integer> response) {
+                            Log.i("user response", response.body().toString());
+                            Toast.makeText(MainActivity.this, "score = " + response.body(), Toast.LENGTH_SHORT).show();
+                            Intent leader=new Intent(MainActivity.this,LeaderBoard.class);
+                            leader.putExtra("contestId",contest.getContestId());
+                            startActivity(leader);
+                            finish();
+
+                        }
+
+                        @Override
+                        public void onFailure(Call<Integer> call, Throwable t) {
+                            Log.i("user fail", t.getLocalizedMessage());
+                        }
+                    });
                 }
-
-                //obj.start();
-
             }
         });
     }

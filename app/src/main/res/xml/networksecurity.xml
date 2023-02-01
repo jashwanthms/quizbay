@@ -5,4 +5,12 @@
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">10.20.5.48</domain>
     </domain-config>
+
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.20.5.27</domain>
+    </domain-config>
+
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.20.5.46</domain>
+    </domain-config>
 </network-security-config>

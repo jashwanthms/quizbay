@@ -1,9 +1,10 @@
 package com.example.quizapp.model;
 
+import java.io.Serializable;
 import java.util.List;
 import com.google.gson.annotations.SerializedName;
 
-public class Contest{
+public class Contest implements Serializable {
 
 	@SerializedName("duration")
 	private int duration;

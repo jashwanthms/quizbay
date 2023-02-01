@@ -18,10 +18,13 @@
         tools:ignore="GoogleAppIndexingWarning"
         tools:targetApi="31">
         <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+        <activity
             android:name=".LeaderBoard"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".ContestsActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
