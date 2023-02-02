@@ -25,7 +25,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText FirstName,LastName,Email,DateOfBirth,Password,PlatformId,PhoneNumber,UserName;
 
     private Button RegisterButton,LoginButton;
-    ApiInterFace apiInterFace;
+    ApiInterFace apiInterFace,apiInterFacedb;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +39,9 @@ public class RegisterActivity extends AppCompatActivity {
         UserName=findViewById(R.id.et_username);
         RegisterButton=findViewById(R.id.btn_createuser);
         LoginButton=findViewById(R.id.btn_login_user);
+
+        apiInterFacedb=((ApplicationClass)getApplication()).userRetrofit.create(ApiInterFace.class);
+
 
         LoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -64,15 +67,40 @@ public class RegisterActivity extends AppCompatActivity {
                 apiInterFace.registerUser(userRegister).enqueue(new Callback<RegisterResponse>() {
                     @Override
                     public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> response) {
-                        RegisterResponse registerResponse = response.body();
-                        Log.e("token", registerResponse.getUserId());
+                        if(response.body()!=null) {
+                            RegisterResponse registerResponse = response.body();
+                            Log.e("token", registerResponse.getUserId());
+                            Toast.makeText(RegisterActivity.this, registerResponse.getUserId(), Toast.LENGTH_SHORT).show();
+                            apiInterFacedb.sendUidandMailToDb(registerResponse.getUserId(),UserName.getText().toString()).enqueue(new Callback<Integer>() {
+                                @Override
+                                public void onResponse(Call<Integer> call, Response<Integer> response) {
+                                    if(response.body()!=null)
+                                    {
+                                        Toast.makeText(RegisterActivity.this, response.body().toString(), Toast.LENGTH_SHORT).show();
+                                        startActivity(new Intent(RegisterActivity.this,LoginActivity.class));
+                                    }else{
+                                        Toast.makeText(RegisterActivity.this, "no response from our db", Toast.LENGTH_SHORT).show();
+                                    }
+
+                                }
+
+                                @Override
+                                public void onFailure(Call<Integer> call, Throwable t) {
+                                    Toast.makeText(RegisterActivity.this, t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }else{
+                            Toast.makeText(RegisterActivity.this, "no response from infra", Toast.LENGTH_SHORT).show();
+                        }
+
+
                         //     ((TextView) findViewById(R.id.tv_access)).setText(registerResponse.getUserId());
-                        Toast.makeText(RegisterActivity.this, registerResponse.getUserId(), Toast.LENGTH_SHORT).show();
+
                     }
 
                     @Override
                     public void onFailure(Call<RegisterResponse> call, Throwable t) {
-
+                        Toast.makeText(RegisterActivity.this, t.getLocalizedMessage()+"infra", Toast.LENGTH_SHORT).show();
                     }
                 });
             }

@@ -3,6 +3,7 @@ package com.example.quizapp;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -275,7 +276,10 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
     }
-    String userId = "ruth001000";
+
+
+    String userId;
+
 
     Boolean existsInLeaderboard;
 
@@ -358,7 +362,8 @@ public class MainActivity extends AppCompatActivity {
         apiInterFace=((ApplicationClass)getApplication()).retrofit.create(ApiInterFace.class);
         userApiInterface = ((ApplicationClass) getApplication()).userRetrofit.create(UserApiInterface.class);
         leaderApiInterFace= ((ApplicationClass) getApplication()).leaderBoardRetrofit.create(ApiInterFace.class);
-
+        SharedPreferences sharedPreferences = getSharedPreferences("LoginCredentialsPref",MODE_PRIVATE);
+        userId =sharedPreferences.getString("username", "def");
         Intent contestIntent = getIntent();
         contest = (Contest) contestIntent.getSerializableExtra("newContest");
         duration = contest.getDurationOfContest()*1000L;
