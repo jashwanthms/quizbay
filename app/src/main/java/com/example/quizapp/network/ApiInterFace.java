@@ -2,6 +2,7 @@ package com.example.quizapp.network;
 
 import com.example.quizapp.RegisterActivity;
 import com.example.quizapp.model.Contest;
+import com.example.quizapp.model.LoginCredentials;
 import com.example.quizapp.model.Ranking;
 import com.example.quizapp.model.RegisterResponse;
 import com.example.quizapp.model.UserRegister;
@@ -30,4 +31,10 @@ public interface ApiInterFace {
 
     @GET("/ranking/checkUserExistsOrNot/{userId}/{contestId}")
     Call<Boolean> checkUserInLeaderBoard(@Path("userId") String userId,@Path("contestId") String contestId);
+
+    @POST("/QuizUser/saveUser/{userId}/{userEmail}")
+    Call<Integer> sendUidandMailToDb(@Path("userId") String userId,@Path("userEmail") String userEmail);
+
+    @POST("/api/auth/login")
+    Call<RegisterResponse> loginUser(@Body LoginCredentials loginCredentials);
 }

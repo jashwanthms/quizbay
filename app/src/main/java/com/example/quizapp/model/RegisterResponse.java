@@ -2,7 +2,9 @@ package com.example.quizapp.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class RegisterResponse{
+import java.io.Serializable;
+
+public class RegisterResponse implements Serializable {
 
 	@SerializedName("accessToken")
 	private String accessToken;
