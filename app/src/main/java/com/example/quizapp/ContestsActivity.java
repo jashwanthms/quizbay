@@ -1,17 +1,20 @@
 package com.example.quizapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.example.quizapp.adapter.ContestsAdapter;
 import com.example.quizapp.application.ApplicationClass;
 import com.example.quizapp.model.Contest;
 import com.example.quizapp.network.ApiInterFace;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,13 +23,15 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ContestsActivity extends AppCompatActivity implements ContestsAdapter.RedirectToContest {
+public class ContestsActivity extends AppCompatActivity implements ContestsAdapter.RedirectToContest, BottomNavigationView.OnNavigationItemSelectedListener {
 
     private RecyclerView recyclerView;
 
     private ApiInterFace apiInterFace;
 
     private List<Contest> contestList=new ArrayList<>();
+
+    BottomNavigationView bottomNavigationView;
     public void loadContests()
     {
 
@@ -56,9 +61,39 @@ public class ContestsActivity extends AppCompatActivity implements ContestsAdapt
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contests);
+        bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        bottomNavigationView.setOnNavigationItemSelectedListener(ContestsActivity.this);
+        bottomNavigationView.setSelectedItemId(R.id.quiz);
         recyclerView=findViewById(R.id.rv_contest);
         apiInterFace=((ApplicationClass)getApplication()).retrofit.create(ApiInterFace.class);
         loadContests();
+
+    }
+//
+//    public void onPointerCaptureChanged(boolean hasCapture) {
+//        super.onPointerCaptureChanged(hasCapture);
+//    }
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+
+        switch (item.getItemId()) {
+            case R.id.quiz:
+
+                break;
+            case R.id.upcomingcontests:
+
+                break;
+            case R.id.dynamic:
+
+                break;
+
+            case R.id.profile:
+                Intent cartIntent=new Intent(ContestsActivity.this,UserProfileActivity.class);
+                startActivity(cartIntent);
+                break;
+        }
+
+        return true;
     }
 
     @Override

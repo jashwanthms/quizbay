@@ -10,23 +10,23 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="20dp"
-        android:padding="12dp"
-        app:cardCornerRadius="20dp"
         android:elevation="20dp"
-        android:outlineAmbientShadowColor="@color/primary">
+        android:outlineAmbientShadowColor="@color/primary"
+        android:padding="12dp"
+        app:cardCornerRadius="20dp">
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:weightSum="6">
+
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="0.5"
-                android:src="@drawable/baseline_person_24"
-                android:background="@color/primary"/>
-
+                android:background="@color/primary"
+                android:src="@drawable/baseline_person_24" />
 
 
             <androidx.appcompat.widget.LinearLayoutCompat
@@ -34,8 +34,8 @@
                 android:layout_height="0dp"
                 android:layout_weight="0.5"
                 android:background="@color/secondary"
-                android:weightSum="2"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:weightSum="2">
 
                 <TextView
                     android:layout_width="0dp"
@@ -43,7 +43,7 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="Email"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tv_profile_email"
@@ -53,7 +53,7 @@
                     android:gravity="center"
                     android:text="email"
                     android:textColor="@color/primary"
-                    android:textStyle="bold|italic"/>
+                    android:textStyle="bold|italic" />
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -65,10 +65,11 @@
                 android:gravity="center"
                 android:textColor="@color/secondary"
                 android:textStyle="bold|italic" />
+
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.1"/>
+                android:layout_weight="0.1" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -83,17 +84,17 @@
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:background="@color/primary"
                 android:layout_weight="4"
-                android:weightSum="6"
-                android:orientation="vertical">
+                android:background="@color/primary"
+                android:orientation="vertical"
+                android:weightSum="6">
 
                 <androidx.appcompat.widget.LinearLayoutCompat
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:weightSum="2"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:weightSum="2">
 
                     <TextView
                         android:layout_width="0dp"
@@ -119,8 +120,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:weightSum="2"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:weightSum="2">
 
                     <TextView
                         android:layout_width="0dp"
@@ -146,8 +147,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:weightSum="2"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:weightSum="2">
 
                     <TextView
                         android:layout_width="0dp"
@@ -173,8 +174,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:weightSum="2"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:weightSum="2">
 
                     <TextView
                         android:layout_width="0dp"
@@ -200,8 +201,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:weightSum="2"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:weightSum="2">
 
                     <TextView
                         android:layout_width="0dp"
@@ -227,8 +228,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
-                    android:weightSum="2"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:weightSum="2">
 
                     <TextView
                         android:layout_width="0dp"
@@ -255,5 +256,15 @@
         </androidx.appcompat.widget.LinearLayoutCompat>
 
     </androidx.cardview.widget.CardView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigationView_prof"
+        android:layout_width="405dp"
+        android:layout_height="61dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_navigation_bar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

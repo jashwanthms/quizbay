@@ -1,5 +1,6 @@
 package com.example.quizapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -32,6 +34,7 @@ import com.example.quizapp.model.QuestionsItem;
 import com.example.quizapp.model.UserResponse;
 import com.example.quizapp.network.ApiInterFace;
 import com.example.quizapp.network.UserApiInterface;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -70,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
     String userId ;
 
     Boolean existsInLeaderboard = true;
+
+
 
 
     private  void addAnswer(){
@@ -379,6 +384,7 @@ public class MainActivity extends AppCompatActivity {
         audioQuestion = findViewById(R.id.audio_text);
         progressBar=findViewById(R.id.progressBar_main);
 
+
         apiInterFace=((ApplicationClass)getApplication()).retrofit.create(ApiInterFace.class);
         userApiInterface = ((ApplicationClass) getApplication()).userRetrofit.create(UserApiInterface.class);
         leaderApiInterFace= ((ApplicationClass) getApplication()).leaderBoardRetrofit.create(ApiInterFace.class);
@@ -387,7 +393,7 @@ public class MainActivity extends AppCompatActivity {
         userId=sharedPreferences.getString("username","def");
         Intent contestIntent = getIntent();
         contest = (Contest) contestIntent.getSerializableExtra("newContest");
-        duration = contest.getDurationOfContest()*1000L;
+            duration = contest.getDurationOfContest()*1000L;
 
 
         userApiInterface.getContestState(userId, contest.getContestId()).enqueue(new Callback<GetUserContestState>() {
@@ -536,6 +542,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -591,4 +599,6 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
+
+
 }
