@@ -13,7 +13,7 @@ public class GetUserContestState{
 	@SerializedName("remainingTime")
 	private long remainingTime;
 
-	@SerializedName("status")
+	@SerializedName("contestStatus")
 	private String status;
 
 	public void setIndex(int index){

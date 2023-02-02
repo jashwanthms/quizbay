@@ -67,6 +67,11 @@ public class MainActivity extends AppCompatActivity {
 
     boolean sendQuestionData = true;
 
+    String userId = "ruth001000";
+
+    Boolean existsInLeaderboard = true;
+
+
     private  void addAnswer(){
         List<String> answerList = new ArrayList<>();
         if(radioGroup.getVisibility() == View.VISIBLE){
@@ -276,15 +281,6 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
     }
-
-
-    String userId;
-
-
-    Boolean existsInLeaderboard;
-
-
-
     public void  counter(long duration){
         countDownTimer = new CountDownTimer(duration, 1000) {
             public void onTick(long millisUntilFinished) {
@@ -295,6 +291,34 @@ public class MainActivity extends AppCompatActivity {
 
             public void onFinish() {
                 addAnswer();
+                if(videoView.isPlaying())
+                    videoView.stopPlayback();
+                if(mp.isPlaying())
+                    mp.stop();
+
+                sendQuestionData = false;
+                existsInLeaderboard = false;
+                ContestSave contestSave = new ContestSave();
+                contestSave.setContestId(contest.getContestId());
+                contestSave.setRemainingTime(currentTime);
+                contestSave.setContestStatus("completed");
+                contestSave.setIndex(i);
+                contestSave.setUserId(userId);
+                contestSave.setTimeLeft(new Date().getTime());
+
+                userApiInterface.putContext(contestSave, userId).enqueue(new Callback<GetUserContestState>() {
+                    @Override
+                    public void onResponse(Call<GetUserContestState> call, Response<GetUserContestState> response) {
+                        Toast.makeText(MainActivity.this, response.body().toString(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, "state saved!", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(Call<GetUserContestState> call, Throwable t) {
+                        Log.e("state save error", t.getLocalizedMessage());
+                    }
+                });
+
                 sendQuestionData = false;
                 userResponse.setQuestionResponseList(questionResponseListItems);
                 userResponse.setContestId(contest.getContestId());
@@ -374,17 +398,56 @@ public class MainActivity extends AppCompatActivity {
                 if(response.body() != null) {
                     GetUserContestState contestState = response.body();
                     if(contestState.getIndex() != -1) {
-                        long remainingTime = contestState.getRemainingTime();
-                        long timeLeft = contestState.getTimeLeft();
-                        long presentTime = new Date().getTime();
-                        Log.e("state response", response.body().toString());
-                        if ((presentTime - timeLeft) < remainingTime) {
-                            i = contestState.getIndex();
-                            duration = remainingTime - (presentTime - timeLeft);
-                            counter(duration);
-                        } else {
-                            Toast.makeText(MainActivity.this, "Time Up!", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(getApplicationContext(), ContestsActivity.class));
+
+                        userApiInterface.updateCountOfUser(getSharedPreferences("LoginCredentialsPref", MODE_PRIVATE).getString("userId", ""), contest.getContentCategory()).enqueue(new Callback<Boolean>() {
+                            @Override
+                            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
+                                Toast.makeText(MainActivity.this, "category updated!", Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onFailure(Call<Boolean> call, Throwable t) {
+
+                            }
+                        });
+
+                        if(contestState.getStatus().equals("not completed")) {
+                            long remainingTime = contestState.getRemainingTime();
+                            long timeLeft = contestState.getTimeLeft();
+                            long presentTime = new Date().getTime();
+                            Log.e("state response", response.body().toString());
+                            if ((presentTime - timeLeft) < remainingTime) {
+                                i = contestState.getIndex();
+                                duration = remainingTime - (presentTime - timeLeft);
+                                counter(duration);
+                            } else {
+                                sendQuestionData = false;
+                                existsInLeaderboard = false;
+                                ContestSave contestSave = new ContestSave();
+                                contestSave.setContestId(contest.getContestId());
+                                contestSave.setRemainingTime(currentTime);
+                                contestSave.setContestStatus("completed");
+                                contestSave.setIndex(i);
+                                contestSave.setUserId(userId);
+                                contestSave.setTimeLeft(new Date().getTime());
+
+                                userApiInterface.putContext(contestSave, userId).enqueue(new Callback<GetUserContestState>() {
+                                    @Override
+                                    public void onResponse(Call<GetUserContestState> call, Response<GetUserContestState> response) {
+                                        Toast.makeText(MainActivity.this, response.body().toString(), Toast.LENGTH_LONG);
+                                        Toast.makeText(MainActivity.this, "state saved!", Toast.LENGTH_SHORT).show();
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<GetUserContestState> call, Throwable t) {
+                                        Log.e("state save error", t.getLocalizedMessage());
+                                    }
+                                });
+                                finish();
+                            }
+                        }else{
+                            Toast.makeText(MainActivity.this, "contest over!", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(getApplicationContext(), LeaderBoard.class).putExtra("contestId", contest.getContestId()));
                             finish();
                         }
                     }
@@ -407,34 +470,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        leaderApiInterFace.checkUserInLeaderBoard(userId, contest.getContestId()).enqueue(new Callback<Boolean>() {
-            @Override
-            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
-                existsInLeaderboard = response.body();
-                if(!existsInLeaderboard)
-                    getContest(contest.getContestId());
-                else{
-                    startActivity(new Intent(getApplicationContext(), LeaderBoard.class).putExtra("contestId", contest.getContestId()));
-                    finish();
-                }
-                Log.e("leader success", response.body().toString());
-            }
-
-            @Override
-            public void onFailure(Call<Boolean> call, Throwable t) {
-                Log.e("leader error", t.getLocalizedMessage());
-            }
-        });
-
         mp=new MediaPlayer();
-
-
-
-
 
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if(videoView.isPlaying())
+                    videoView.stopPlayback();
+                if(mp.isPlaying())
+                    mp.stop();
 
                 if(radioGroup.getVisibility() == View.VISIBLE && radioGroup.getCheckedRadioButtonId() == -1){
                     Toast.makeText(MainActivity.this, "Select an answer!", Toast.LENGTH_SHORT).show();
@@ -446,6 +491,30 @@ public class MainActivity extends AppCompatActivity {
                         countDownTimer.cancel();
                         addAnswer();
                         sendQuestionData = false;
+
+                        ContestSave contestSave = new ContestSave();
+                        contestSave.setContestId(contest.getContestId());
+                        contestSave.setRemainingTime(currentTime);
+                        contestSave.setContestStatus("completed");
+                        contestSave.setIndex(i);
+                        contestSave.setUserId(userId);
+                        contestSave.setTimeLeft(new Date().getTime());
+
+                        userApiInterface.putContext(contestSave, userId).enqueue(new Callback<GetUserContestState>() {
+                            @Override
+                            public void onResponse(Call<GetUserContestState> call, Response<GetUserContestState> response) {
+                                Toast.makeText(MainActivity.this, response.body().toString(), Toast.LENGTH_LONG);
+                                Toast.makeText(MainActivity.this, "state saved!", Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onFailure(Call<GetUserContestState> call, Throwable t) {
+                                Log.e("state save error", t.getLocalizedMessage());
+                            }
+                        });
+
+                        existsInLeaderboard = false;
+
                         userResponse.setQuestionResponseList(questionResponseListItems);
                         userResponse.setContestId(contest.getContestId());
                         userResponse.setUserId(userId);
@@ -478,25 +547,28 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         countDownTimer.cancel();
-        ContestSave contestSave = new ContestSave();
-        contestSave.setContestId(contest.getContestId());
-        contestSave.setRemainingTime(currentTime);
-        contestSave.setIndex(i);
-        contestSave.setUserId(userId);
-        contestSave.setTimeLeft(new Date().getTime());
+        if(existsInLeaderboard) {
+            ContestSave contestSave = new ContestSave();
+            contestSave.setContestId(contest.getContestId());
+            contestSave.setRemainingTime(currentTime);
+            contestSave.setContestStatus("completed");
+            contestSave.setIndex(i);
+            contestSave.setUserId(userId);
+            contestSave.setTimeLeft(new Date().getTime());
 
-        userApiInterface.putContext(contestSave, userId).enqueue(new Callback<GetUserContestState>() {
-            @Override
-            public void onResponse(Call<GetUserContestState> call, Response<GetUserContestState> response) {
-                Toast.makeText(MainActivity.this, response.body().toString(), Toast.LENGTH_LONG);
-                Toast.makeText(MainActivity.this, "state saved!", Toast.LENGTH_SHORT).show();
-            }
+            userApiInterface.putContext(contestSave, userId).enqueue(new Callback<GetUserContestState>() {
+                @Override
+                public void onResponse(Call<GetUserContestState> call, Response<GetUserContestState> response) {
+                    Toast.makeText(MainActivity.this, response.body().toString(), Toast.LENGTH_LONG);
+                    Toast.makeText(MainActivity.this, "state saved!", Toast.LENGTH_SHORT).show();
+                }
 
-            @Override
-            public void onFailure(Call<GetUserContestState> call, Throwable t) {
-                Log.e("state save error", t.getLocalizedMessage());
-            }
-        });
+                @Override
+                public void onFailure(Call<GetUserContestState> call, Throwable t) {
+                    Log.e("state save error", t.getLocalizedMessage());
+                }
+            });
+        }
 
         if(sendQuestionData) {
 

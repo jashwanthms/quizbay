@@ -2,6 +2,7 @@ package com.example.quizapp.network;
 import com.example.quizapp.model.ContestSave;
 
 import com.example.quizapp.model.GetUserContestState;
+import com.example.quizapp.model.UserData;
 import com.example.quizapp.model.UserResponse;
 
 import retrofit2.Call;
@@ -20,4 +21,10 @@ public interface UserApiInterface {
 
     @GET("QuizUser/getIndex/{userId}/{contestId}")
     Call<GetUserContestState> getContestState(@Path("userId") String userId, @Path("contestId") String contestId);
+
+    @POST("QuizUser/countOfCategory/{userId}/{category}")
+    Call<Boolean> updateCountOfUser(@Path("userId") String userId, @Path("category") String category);
+
+    @GET("QuizUser/getListOfCategory/{userId}")
+    Call<UserData> getUserData(@Path("userId") String userId);
 }

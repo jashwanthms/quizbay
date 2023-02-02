@@ -65,6 +65,5 @@ public class LeaderBoard extends AppCompatActivity {
         apiInterFace=((ApplicationClass)getApplication()).leaderBoardRetrofit.create(ApiInterFace.class);
         Intent contestIntent=getIntent();
         loadLeaderBoard(contestIntent.getStringExtra("contestId"));
-
     }
 }
