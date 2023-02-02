@@ -24,4 +24,7 @@ public interface UserApiInterface {
 
     @POST("QuizUser/countOfCategory/{userId}/{category}")
     Call<Boolean> updateCountOfUser(@Path("userId") String userId, @Path("category") String category);
+
+    @GET("QuizUser/getListOfCategory/{userId}")
+    Call<UserData> getUserData(@Path("userId") String userId);
 }

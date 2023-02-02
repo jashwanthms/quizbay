@@ -85,7 +85,7 @@
                 android:layout_height="0dp"
                 android:background="@color/primary"
                 android:layout_weight="4"
-                android:weightSum="6"
+                android:weightSum="6.8"
                 android:orientation="vertical">
 
                 <androidx.appcompat.widget.LinearLayoutCompat
@@ -248,8 +248,16 @@
                         android:text="fashion"
                         android:textColor="@color/secondary"
                         android:textStyle="bold|italic" />
-
                 </androidx.appcompat.widget.LinearLayoutCompat>
+
+                <Button
+                    android:id="@+id/bt_profile_sign_out"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="@color/secondary"
+                    android:text="Sign Out"
+                    android:textColor="@color/primary" />
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 

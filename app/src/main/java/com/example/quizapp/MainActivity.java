@@ -3,6 +3,7 @@ package com.example.quizapp;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -280,7 +281,6 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
     }
-
     public void  counter(long duration){
         countDownTimer = new CountDownTimer(duration, 1000) {
             public void onTick(long millisUntilFinished) {
@@ -291,6 +291,11 @@ public class MainActivity extends AppCompatActivity {
 
             public void onFinish() {
                 addAnswer();
+                if(videoView.isPlaying())
+                    videoView.stopPlayback();
+                if(mp.isPlaying())
+                    mp.stop();
+
                 sendQuestionData = false;
                 existsInLeaderboard = false;
                 ContestSave contestSave = new ContestSave();
@@ -304,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
                 userApiInterface.putContext(contestSave, userId).enqueue(new Callback<GetUserContestState>() {
                     @Override
                     public void onResponse(Call<GetUserContestState> call, Response<GetUserContestState> response) {
-                        Toast.makeText(MainActivity.this, response.body().toString(), Toast.LENGTH_LONG);
+                        Toast.makeText(MainActivity.this, response.body().toString(), Toast.LENGTH_LONG).show();
                         Toast.makeText(MainActivity.this, "state saved!", Toast.LENGTH_SHORT).show();
                     }
 
@@ -381,7 +386,8 @@ public class MainActivity extends AppCompatActivity {
         apiInterFace=((ApplicationClass)getApplication()).retrofit.create(ApiInterFace.class);
         userApiInterface = ((ApplicationClass) getApplication()).userRetrofit.create(UserApiInterface.class);
         leaderApiInterFace= ((ApplicationClass) getApplication()).leaderBoardRetrofit.create(ApiInterFace.class);
-
+        SharedPreferences sharedPreferences = getSharedPreferences("LoginCredentialsPref",MODE_PRIVATE);
+        userId =sharedPreferences.getString("username", "def");
         Intent contestIntent = getIntent();
         contest = (Contest) contestIntent.getSerializableExtra("newContest");
         duration = contest.getDurationOfContest()*1000L;
@@ -393,7 +399,7 @@ public class MainActivity extends AppCompatActivity {
                     GetUserContestState contestState = response.body();
                     if(contestState.getIndex() != -1) {
 
-                        userApiInterface.updateCountOfUser(getSharedPreferences("LoginCredentialsPref", MODE_PRIVATE).getString("username", ""), contest.getContentCategory()).enqueue(new Callback<Boolean>() {
+                        userApiInterface.updateCountOfUser(getSharedPreferences("LoginCredentialsPref", MODE_PRIVATE).getString("userId", ""), contest.getContentCategory()).enqueue(new Callback<Boolean>() {
                             @Override
                             public void onResponse(Call<Boolean> call, Response<Boolean> response) {
                                 Toast.makeText(MainActivity.this, "category updated!", Toast.LENGTH_SHORT).show();
@@ -469,6 +475,11 @@ public class MainActivity extends AppCompatActivity {
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if(videoView.isPlaying())
+                    videoView.stopPlayback();
+                if(mp.isPlaying())
+                    mp.stop();
 
                 if(radioGroup.getVisibility() == View.VISIBLE && radioGroup.getCheckedRadioButtonId() == -1){
                     Toast.makeText(MainActivity.this, "Select an answer!", Toast.LENGTH_SHORT).show();

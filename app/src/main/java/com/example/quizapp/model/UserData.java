@@ -10,6 +10,9 @@ public class UserData{
 	@SerializedName("isEntertainment")
 	private int isEntertainment;
 
+	@SerializedName("isMusic")
+	private int isMusic;
+
 	@SerializedName("isFashion")
 	private int isFashion;
 
@@ -19,8 +22,8 @@ public class UserData{
 	@SerializedName("isFood")
 	private int isFood;
 
-	@SerializedName("userId")
-	private String userId;
+	@SerializedName("quizUserEmail")
+	private String quizUserEmail;
 
 	public void setIsSports(int isSports){
 		this.isSports = isSports;
@@ -36,6 +39,14 @@ public class UserData{
 
 	public int getIsEntertainment(){
 		return isEntertainment;
+	}
+
+	public void setIsMusic(int isMusic){
+		this.isMusic = isMusic;
+	}
+
+	public int getIsMusic(){
+		return isMusic;
 	}
 
 	public void setIsFashion(int isFashion){
@@ -62,12 +73,12 @@ public class UserData{
 		return isFood;
 	}
 
-	public void setUserId(String userId){
-		this.userId = userId;
+	public void setQuizUserEmail(String quizUserEmail){
+		this.quizUserEmail = quizUserEmail;
 	}
 
-	public String getUserId(){
-		return userId;
+	public String getQuizUserEmail(){
+		return quizUserEmail;
 	}
 
 	@Override
@@ -76,10 +87,11 @@ public class UserData{
 			"UserData{" + 
 			"isSports = '" + isSports + '\'' + 
 			",isEntertainment = '" + isEntertainment + '\'' + 
+			",isMusic = '" + isMusic + '\'' + 
 			",isFashion = '" + isFashion + '\'' + 
 			",isTravel = '" + isTravel + '\'' + 
 			",isFood = '" + isFood + '\'' + 
-			",userId = '" + userId + '\'' + 
+			",quizUserEmail = '" + quizUserEmail + '\'' + 
 			"}";
 		}
 }
