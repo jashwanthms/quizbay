@@ -258,7 +258,7 @@ public class MainActivity extends AppCompatActivity {
                         if(response.isSuccessful()&& response.body()!=null)
                         {
                             contest = response.body();
-                            duration=contest.getDuration();
+                            duration=contest.getDuration()*1000L;
                             listquestions = contest.getQuestions();
                             progressBar.setVisibility(View.GONE);
                             setScreen(listquestions.get(i));
@@ -288,41 +288,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Intent contestIntent=getIntent();
-        contest = (Contest) contestIntent.getSerializableExtra("newContest");
-        apiInterFace=((ApplicationClass)getApplication()).retrofit.create(ApiInterFace.class);
-        userApiInterface = ((ApplicationClass) getApplication()).userRetrofit.create(UserApiInterface.class);
-
-        userApiInterface.getContestState("1", contest.getContestId()).enqueue(new Callback<GetUserContestState>() {
-            @Override
-            public void onResponse(Call<GetUserContestState> call, Response<GetUserContestState> response) {
-                if(response.body() != null) {
-                    GetUserContestState contestState = response.body();
-                    long remainingTime = contestState.getRemainingTime();
-                    long timeLeft = contestState.getTimeLeft();
-                    long presentTime = new Date().getTime();
-
-                    if (presentTime - timeLeft < remainingTime) {
-                        i = response.body().getIndex();
-                        duration = remainingTime - (presentTime - timeLeft);
-                    } else {
-                        Toast.makeText(MainActivity.this, "Time Up!", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(getApplicationContext(), ContestsActivity.class));
-                        finish();
-                    }
-                }else{
-                    duration = contest.getDuration() * 1000L;
-                }
-            }
-
-            @Override
-            public void onFailure(Call<GetUserContestState> call, Throwable t) {
-                Toast.makeText(MainActivity.this, t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                Log.i("save error", t.getLocalizedMessage());
-            }
-        });
-
-
         mTextField=findViewById(R.id.timer_check);
         questionView=findViewById(R.id.tv_question);
         nextButton=findViewById(R.id.btn_next);
@@ -349,11 +314,48 @@ public class MainActivity extends AppCompatActivity {
         audioQuestion = findViewById(R.id.audio_text);
         progressBar=findViewById(R.id.progressBar_main);
 
+        apiInterFace=((ApplicationClass)getApplication()).retrofit.create(ApiInterFace.class);
+        userApiInterface = ((ApplicationClass) getApplication()).userRetrofit.create(UserApiInterface.class);
 
-        mp=new MediaPlayer();
+        Intent contestIntent=getIntent();
+        contest = (Contest) contestIntent.getSerializableExtra("newContest");
         getContest(contest.getContestId());
 
-        countDownTimer = new CountDownTimer(duration, 1000) {
+        userApiInterface.getContestState("1", contest.getContestId()).enqueue(new Callback<GetUserContestState>() {
+            @Override
+            public void onResponse(Call<GetUserContestState> call, Response<GetUserContestState> response) {
+                if(response.body() != null) {
+                    GetUserContestState contestState = response.body();
+                    long remainingTime = contestState.getRemainingTime();
+                    long timeLeft = contestState.getTimeLeft();
+                    long presentTime = new Date().getTime();
+                    Log.e("state response", response.body().toString());
+                    if (presentTime - timeLeft < remainingTime) {
+                        i = response.body().getIndex();
+                        duration = remainingTime - (presentTime - timeLeft);
+                    } else {
+                        Toast.makeText(MainActivity.this, "Time Up!", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(getApplicationContext(), ContestsActivity.class));
+                        finish();
+                    }
+                }else{
+                    Log.e("state response null", "null state");
+                    duration = contest.getDuration() * 1000L;
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GetUserContestState> call, Throwable t) {
+                Toast.makeText(MainActivity.this, t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                Log.i("save error", t.getLocalizedMessage());
+                duration = contest.getDuration() * 1000L;
+
+            }
+        });
+
+        mp=new MediaPlayer();
+
+        countDownTimer = new CountDownTimer(20 * 1000L, 1000) {
             public void onTick(long millisUntilFinished) {
                 mTextField.setText( ""+millisUntilFinished / 1000);
             }
@@ -370,7 +372,7 @@ public class MainActivity extends AppCompatActivity {
                 userApiInterface.getQuestionResponse(userResponse).enqueue(new Callback<Integer>() {
                     @Override
                     public void onResponse(Call<Integer> call, Response<Integer> response) {
-                        Log.i("user response", response.body().toString());
+//                        Log.i("user response", response.body().toString());
                         Toast.makeText(MainActivity.this, "score = " + response.body(), Toast.LENGTH_SHORT).show();
                         Intent leader=new Intent(MainActivity.this,LeaderBoard.class);
                         leader.putExtra("contestId",contest.getContestId());
@@ -464,7 +466,7 @@ public class MainActivity extends AppCompatActivity {
         userApiInterface.getQuestionResponse(userResponse).enqueue(new Callback<Integer>() {
             @Override
             public void onResponse(Call<Integer> call, Response<Integer> response) {
-                Log.i("user response", response.body().toString());
+                //Log.i("user response", response.body().toString());
                 Toast.makeText(MainActivity.this, "score = " + response.body(), Toast.LENGTH_SHORT).show();
                 Intent leader=new Intent(MainActivity.this,LeaderBoard.class);
                 leader.putExtra("contestId",contest.getContestId());

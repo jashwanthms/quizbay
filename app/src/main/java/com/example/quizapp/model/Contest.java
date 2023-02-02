@@ -6,8 +6,8 @@ import com.google.gson.annotations.SerializedName;
 
 public class Contest implements Serializable {
 
-	@SerializedName("duration")
-	private int duration;
+	@SerializedName("durationOfContest")
+	private long duration;
 
 	@SerializedName("quizMasterId")
 	private String quizMasterId;
@@ -36,11 +36,11 @@ public class Contest implements Serializable {
 	@SerializedName("contentCategory")
 	private String contentCategory;
 
-	public void setDuration(int duration){
+	public void setDuration(long duration){
 		this.duration = duration;
 	}
 
-	public int getDuration(){
+	public long getDuration(){
 		return duration;
 	}
 
