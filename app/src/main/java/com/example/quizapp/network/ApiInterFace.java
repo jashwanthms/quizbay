@@ -27,4 +27,7 @@ public interface ApiInterFace {
 
     @POST("api/auth/register")
     Call<RegisterResponse> registerUser(@Body UserRegister userRegister);
+
+    @GET("/ranking/checkUserExistsOrNot/{userId}/{contestId}")
+    Call<Boolean> checkUserInLeaderBoard(@Path("userId") String userId,@Path("contestId") String contestId);
 }

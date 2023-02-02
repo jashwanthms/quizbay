@@ -44,31 +44,27 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView mTextField,questionView,difficultyLevel, marks, imageQuestion, videoQuestion, audioQuestion;
     private Button nextButton;
+    private long currentTime;
     private VideoView videoView;
     List<QuestionResponseListItem> questionResponseListItems = new ArrayList<>();
     UserResponse userResponse = new UserResponse();
     private int i=0;
-
-    private Contest contest;
+    private Contest contest, thisContest;
     CountDownTimer countDownTimer;
     private MediaController mediaController;
-
-    private ApiInterFace apiInterFace;
+    private ApiInterFace apiInterFace,leaderApiInterFace;
     private  UserApiInterface userApiInterface;
-
     private RadioButton option1,option2,option3,option4;
     private RadioGroup radioGroup;
     private CheckBox chOption1,chOption2,chOption3,chOption4;
-
     private ImageView imageView,playPause;
-
     private LinearLayout layout, image_linear, video_linear, audio_linear;
-
     private MediaPlayer mp;
     List<QuestionsItem> listquestions;
     private ProgressBar progressBar;
-
     long duration;
+
+    boolean sendQuestionData = true;
 
     private  void addAnswer(){
         List<String> answerList = new ArrayList<>();
@@ -247,8 +243,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void getContest(String id)
-    {
+    private void getContest(String id){
 
         progressBar.setVisibility(View.VISIBLE);
         apiInterFace.getById(id).enqueue(
@@ -257,9 +252,8 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(Call<Contest> call, Response<Contest> response) {
                         if(response.isSuccessful()&& response.body()!=null)
                         {
-                            contest = response.body();
-                            duration=contest.getDuration()*1000L;
-                            listquestions = contest.getQuestions();
+                            thisContest = response.body();
+                            listquestions = thisContest.getQuestions();
                             progressBar.setVisibility(View.GONE);
                             setScreen(listquestions.get(i));
                             //addAnswer(0);
@@ -281,7 +275,54 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
     }
+    String userId = "ruth001000";
 
+    Boolean existsInLeaderboard;
+
+
+
+    public void  counter(long duration){
+        countDownTimer = new CountDownTimer(duration, 1000) {
+            public void onTick(long millisUntilFinished) {
+                mTextField.setText( ""+millisUntilFinished / 1000);
+                currentTime = millisUntilFinished;
+
+            }
+
+            public void onFinish() {
+                addAnswer();
+                sendQuestionData = false;
+                userResponse.setQuestionResponseList(questionResponseListItems);
+                userResponse.setContestId(contest.getContestId());
+                userResponse.setUserId(userId);
+                userResponse.setContestStatus("completed");
+                userResponse.setQuestionResponseList(questionResponseListItems);
+                userResponse.setTimeStamp(new Date().getTime());
+
+                userApiInterface.getQuestionResponse(userResponse).enqueue(new Callback<Integer>() {
+                    @Override
+                    public void onResponse(Call<Integer> call, Response<Integer> response) {
+//                        Log.i("user response", response.body().toString());
+                        Toast.makeText(MainActivity.this, "score = " + response.body(), Toast.LENGTH_SHORT).show();
+                        Intent leader=new Intent(MainActivity.this,LeaderBoard.class);
+                        leader.putExtra("contestId",contest.getContestId());
+                        startActivity(leader);
+                        finish();
+                    }
+                    @Override
+                    public void onFailure(Call<Integer> call, Throwable t) {
+                        Log.i("user fail", t.getLocalizedMessage());
+                    }
+                });
+//              obj.cancel();
+//                if(i < listquestions.size()) {
+//                    setScreen(listquestions.get(i));
+//                    i+=1;
+//                    // obj.start();
+//                }
+            }
+        }.start();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -316,31 +357,40 @@ public class MainActivity extends AppCompatActivity {
 
         apiInterFace=((ApplicationClass)getApplication()).retrofit.create(ApiInterFace.class);
         userApiInterface = ((ApplicationClass) getApplication()).userRetrofit.create(UserApiInterface.class);
+        leaderApiInterFace= ((ApplicationClass) getApplication()).leaderBoardRetrofit.create(ApiInterFace.class);
 
-        Intent contestIntent=getIntent();
+        Intent contestIntent = getIntent();
         contest = (Contest) contestIntent.getSerializableExtra("newContest");
-        getContest(contest.getContestId());
+        duration = contest.getDurationOfContest()*1000L;
 
-        userApiInterface.getContestState("1", contest.getContestId()).enqueue(new Callback<GetUserContestState>() {
+        userApiInterface.getContestState(userId, contest.getContestId()).enqueue(new Callback<GetUserContestState>() {
             @Override
             public void onResponse(Call<GetUserContestState> call, Response<GetUserContestState> response) {
                 if(response.body() != null) {
                     GetUserContestState contestState = response.body();
-                    long remainingTime = contestState.getRemainingTime();
-                    long timeLeft = contestState.getTimeLeft();
-                    long presentTime = new Date().getTime();
-                    Log.e("state response", response.body().toString());
-                    if (presentTime - timeLeft < remainingTime) {
-                        i = response.body().getIndex();
-                        duration = remainingTime - (presentTime - timeLeft);
-                    } else {
-                        Toast.makeText(MainActivity.this, "Time Up!", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(getApplicationContext(), ContestsActivity.class));
-                        finish();
+                    if(contestState.getIndex() != -1) {
+                        long remainingTime = contestState.getRemainingTime();
+                        long timeLeft = contestState.getTimeLeft();
+                        long presentTime = new Date().getTime();
+                        Log.e("state response", response.body().toString());
+                        if ((presentTime - timeLeft) < remainingTime) {
+                            i = contestState.getIndex();
+                            duration = remainingTime - (presentTime - timeLeft);
+                            counter(duration);
+                        } else {
+                            Toast.makeText(MainActivity.this, "Time Up!", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(getApplicationContext(), ContestsActivity.class));
+                            finish();
+                        }
+                    }
+                    else{
+                        duration  = contest.getDurationOfContest()*1000L;
+                        counter(duration);
                     }
                 }else{
+
                     Log.e("state response null", "null state");
-                    duration = contest.getDuration() * 1000L;
+                    //duration =  1000L;
                 }
             }
 
@@ -348,50 +398,32 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Call<GetUserContestState> call, Throwable t) {
                 Toast.makeText(MainActivity.this, t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                 Log.i("save error", t.getLocalizedMessage());
-                duration = contest.getDuration() * 1000L;
+                //duration = contest.getDurationOfContest() * 1000L;
+            }
+        });
 
+        leaderApiInterFace.checkUserInLeaderBoard(userId, contest.getContestId()).enqueue(new Callback<Boolean>() {
+            @Override
+            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
+                existsInLeaderboard = response.body();
+                if(!existsInLeaderboard)
+                    getContest(contest.getContestId());
+                else{
+                    startActivity(new Intent(getApplicationContext(), LeaderBoard.class).putExtra("contestId", contest.getContestId()));
+                    finish();
+                }
+                Log.e("leader success", response.body().toString());
+            }
+
+            @Override
+            public void onFailure(Call<Boolean> call, Throwable t) {
+                Log.e("leader error", t.getLocalizedMessage());
             }
         });
 
         mp=new MediaPlayer();
 
-        countDownTimer = new CountDownTimer(20 * 1000L, 1000) {
-            public void onTick(long millisUntilFinished) {
-                mTextField.setText( ""+millisUntilFinished / 1000);
-            }
 
-            public void onFinish() {
-                addAnswer();
-                userResponse.setQuestionResponseList(questionResponseListItems);
-                userResponse.setContestId(contest.getContestId());
-                userResponse.setUserId("1");
-                userResponse.setContestStatus("completed");
-                userResponse.setQuestionResponseList(questionResponseListItems);
-                userResponse.setTimeStamp(new Date().getTime());
-
-                userApiInterface.getQuestionResponse(userResponse).enqueue(new Callback<Integer>() {
-                    @Override
-                    public void onResponse(Call<Integer> call, Response<Integer> response) {
-//                        Log.i("user response", response.body().toString());
-                        Toast.makeText(MainActivity.this, "score = " + response.body(), Toast.LENGTH_SHORT).show();
-                        Intent leader=new Intent(MainActivity.this,LeaderBoard.class);
-                        leader.putExtra("contestId",contest.getContestId());
-                        startActivity(leader);
-                        finish();
-                    }
-                    @Override
-                    public void onFailure(Call<Integer> call, Throwable t) {
-                        Log.i("user fail", t.getLocalizedMessage());
-                    }
-                });
-//              obj.cancel();
-//                if(i < listquestions.size()) {
-//                    setScreen(listquestions.get(i));
-//                    i+=1;
-//                    // obj.start();
-//                }
-            }
-        }.start();
 
 
 
@@ -406,10 +438,12 @@ public class MainActivity extends AppCompatActivity {
                         addAnswer();
                         setScreen(listquestions.get(i));
                     }else{
+                        countDownTimer.cancel();
                         addAnswer();
+                        sendQuestionData = false;
                         userResponse.setQuestionResponseList(questionResponseListItems);
                         userResponse.setContestId(contest.getContestId());
-                        userResponse.setUserId("1");
+                        userResponse.setUserId(userId);
                         userResponse.setContestStatus("completed");
                         userResponse.setQuestionResponseList(questionResponseListItems);
                         userResponse.setTimeStamp(new Date().getTime());
@@ -417,7 +451,7 @@ public class MainActivity extends AppCompatActivity {
                         userApiInterface.getQuestionResponse(userResponse).enqueue(new Callback<Integer>() {
                             @Override
                             public void onResponse(Call<Integer> call, Response<Integer> response) {
-                                Log.i("user response", response.body().toString());
+//                                Log.i("user response", response.body().toString());
                                 Toast.makeText(MainActivity.this, "score = " + response.body(), Toast.LENGTH_SHORT).show();
                                 Intent leader=new Intent(MainActivity.this,LeaderBoard.class);
                                 leader.putExtra("contestId",contest.getContestId());
@@ -438,45 +472,52 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        countDownTimer.cancel();
         ContestSave contestSave = new ContestSave();
         contestSave.setContestId(contest.getContestId());
-        contestSave.setRemainingTime(Long.parseLong(mTextField.getText().toString()));
+        contestSave.setRemainingTime(currentTime);
         contestSave.setIndex(i);
+        contestSave.setUserId(userId);
         contestSave.setTimeLeft(new Date().getTime());
 
-        userApiInterface.putContext("1", contestSave).enqueue(new Callback<GetUserContestState>() {
+        userApiInterface.putContext(contestSave, userId).enqueue(new Callback<GetUserContestState>() {
             @Override
             public void onResponse(Call<GetUserContestState> call, Response<GetUserContestState> response) {
+                Toast.makeText(MainActivity.this, response.body().toString(), Toast.LENGTH_LONG);
                 Toast.makeText(MainActivity.this, "state saved!", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(Call<GetUserContestState> call, Throwable t) {
-
+                Log.e("state save error", t.getLocalizedMessage());
             }
         });
 
-        userResponse.setQuestionResponseList(questionResponseListItems);
-        userResponse.setContestId(contest.getContestId());
-        userResponse.setUserId("1");
-        userResponse.setContestStatus("not completed");
-        userResponse.setQuestionResponseList(questionResponseListItems);
-        userResponse.setTimeStamp(new Date().getTime());
+        if(sendQuestionData) {
 
-        userApiInterface.getQuestionResponse(userResponse).enqueue(new Callback<Integer>() {
-            @Override
-            public void onResponse(Call<Integer> call, Response<Integer> response) {
-                //Log.i("user response", response.body().toString());
-                Toast.makeText(MainActivity.this, "score = " + response.body(), Toast.LENGTH_SHORT).show();
-                Intent leader=new Intent(MainActivity.this,LeaderBoard.class);
-                leader.putExtra("contestId",contest.getContestId());
-                startActivity(leader);
-                finish();
-            }
-            @Override
-            public void onFailure(Call<Integer> call, Throwable t) {
-                Log.i("user fail", t.getLocalizedMessage());
-            }
-        });
+            userResponse.setQuestionResponseList(questionResponseListItems);
+            userResponse.setContestId(contest.getContestId());
+            userResponse.setUserId(userId);
+            userResponse.setContestStatus("not completed");
+            userResponse.setQuestionResponseList(questionResponseListItems);
+            userResponse.setTimeStamp(new Date().getTime());
+
+            userApiInterface.getQuestionResponse(userResponse).enqueue(new Callback<Integer>() {
+                @Override
+                public void onResponse(Call<Integer> call, Response<Integer> response) {
+                    //Log.i("user response", response.body().toString());
+                    Toast.makeText(MainActivity.this, "score = " + response.body(), Toast.LENGTH_SHORT).show();
+//                Intent leader=new Intent(MainActivity.this,LeaderBoard.class);
+//                leader.putExtra("contestId",contest.getContestId());
+//                startActivity(leader);
+                    finish();
+                }
+
+                @Override
+                public void onFailure(Call<Integer> call, Throwable t) {
+                    Log.i("user fail", t.getLocalizedMessage());
+                }
+            });
+        }
     }
 }

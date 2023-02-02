@@ -78,7 +78,7 @@ public class ContestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
            contestName.setText(contest.getContestName());
            contestCategory.setText(contest.getContentCategory());
-           contestDuration.setText(contest.getDuration()+"");
+           contestDuration.setText(contest.getDurationOfContest()+"");
         }
     }
 

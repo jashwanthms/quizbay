@@ -64,7 +64,7 @@ public class LeaderBoard extends AppCompatActivity {
         recyclerView=findViewById(R.id.rv_leader);
         apiInterFace=((ApplicationClass)getApplication()).leaderBoardRetrofit.create(ApiInterFace.class);
         Intent contestIntent=getIntent();
-       loadLeaderBoard(contestIntent.getStringExtra("contestId"));
+        loadLeaderBoard(contestIntent.getStringExtra("contestId"));
 
     }
 }
