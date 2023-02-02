@@ -2,7 +2,9 @@ package com.example.quizapp.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class GetUserContestState{
+import java.io.Serializable;
+
+public class GetUserContestState implements Serializable {
 
 	@SerializedName("index")
 	private int index;
@@ -13,7 +15,7 @@ public class GetUserContestState{
 	@SerializedName("remainingTime")
 	private long remainingTime;
 
-	@SerializedName("status")
+	@SerializedName("contestStatus")
 	private String status;
 
 	public void setIndex(int index){

@@ -33,7 +33,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="0.5"
-                android:background="sec"
+                android:background="@color/secondary"
                 android:weightSum="2"
                 android:orientation="horizontal">
 
@@ -43,7 +43,7 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="Email"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"/>
 
                 <TextView
                     android:id="@+id/tv_profile_email"
@@ -53,7 +53,7 @@
                     android:gravity="center"
                     android:text="email"
                     android:textColor="@color/primary"
-                    android:textStyle="bold|italic" />
+                    android:textStyle="bold|italic"/>
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -93,7 +93,6 @@
                     android:layout_height="0dp"
                     android:layout_weight="1"
                     android:weightSum="2"
-                    android:background=""
                     android:orientation="horizontal">
 
                     <TextView

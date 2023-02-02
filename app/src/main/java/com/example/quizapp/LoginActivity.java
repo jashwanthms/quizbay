@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,6 +27,8 @@ public class LoginActivity extends AppCompatActivity {
     private Button LoginButton,RegisterButton;
 
     private ApiInterFace apiInterFace;
+
+    private SharedPreferences sharedPreferences,getLoginPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,7 +40,18 @@ public class LoginActivity extends AppCompatActivity {
         apiInterFace=((ApplicationClass)getApplication()).registerRetrofit.create(ApiInterFace.class);
 
 
-        SharedPreferences sharedPreferences = getSharedPreferences("LoginCredentialsPref",MODE_PRIVATE);
+        try {
+            getLoginPreferences = getSharedPreferences("LoginCredentialsPref", MODE_PRIVATE);
+            if (!TextUtils.isEmpty(getLoginPreferences.getString("username", ""))) {
+                startActivity(new Intent(LoginActivity.this, ContestsActivity.class));
+                finish();
+            }
+        }catch (Exception e)
+        {
+
+        }
+
+         sharedPreferences = getSharedPreferences("LoginCredentialsPref",MODE_PRIVATE);
 
         SharedPreferences.Editor myEdit = sharedPreferences.edit();
 
@@ -66,6 +80,7 @@ public class LoginActivity extends AppCompatActivity {
                             myEdit.putString("username", UserName.getText().toString());
                             myEdit.apply();
                             startActivity(new Intent(LoginActivity.this,ContestsActivity.class));
+                            finish();
                         }else{
                             Toast.makeText(LoginActivity.this, "login Failed", Toast.LENGTH_SHORT).show();
                         }

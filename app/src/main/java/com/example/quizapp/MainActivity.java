@@ -3,6 +3,7 @@ package com.example.quizapp;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -66,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
     boolean sendQuestionData = true;
 
-    String userId = "ruth001000";
+    String userId ;
 
     Boolean existsInLeaderboard = true;
 
@@ -107,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
         QuestionResponseListItem responseItem = new QuestionResponseListItem();
         responseItem.setQuestionId(listquestions.get(i).getQuestionId());
 
-        if (listquestions.get(i).getAnswer().equals(answerList)) {
+        if (listquestions.get(i).getAnswer().containsAll(answerList)) {
             responseItem.setScore(Integer.parseInt(marks.getText().toString()));
         } else {
             responseItem.setScore(0);
@@ -382,9 +383,12 @@ public class MainActivity extends AppCompatActivity {
         userApiInterface = ((ApplicationClass) getApplication()).userRetrofit.create(UserApiInterface.class);
         leaderApiInterFace= ((ApplicationClass) getApplication()).leaderBoardRetrofit.create(ApiInterFace.class);
 
+        SharedPreferences sharedPreferences=getSharedPreferences("LoginCredentialsPref",MODE_PRIVATE);
+        userId=sharedPreferences.getString("username","def");
         Intent contestIntent = getIntent();
         contest = (Contest) contestIntent.getSerializableExtra("newContest");
         duration = contest.getDurationOfContest()*1000L;
+
 
         userApiInterface.getContestState(userId, contest.getContestId()).enqueue(new Callback<GetUserContestState>() {
             @Override
@@ -392,19 +396,6 @@ public class MainActivity extends AppCompatActivity {
                 if(response.body() != null) {
                     GetUserContestState contestState = response.body();
                     if(contestState.getIndex() != -1) {
-
-                        userApiInterface.updateCountOfUser(getSharedPreferences("LoginCredentialsPref", MODE_PRIVATE).getString("username", ""), contest.getContentCategory()).enqueue(new Callback<Boolean>() {
-                            @Override
-                            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
-                                Toast.makeText(MainActivity.this, "category updated!", Toast.LENGTH_SHORT).show();
-                            }
-
-                            @Override
-                            public void onFailure(Call<Boolean> call, Throwable t) {
-
-                            }
-                        });
-
                         if(contestState.getStatus().equals("not completed")) {
                             long remainingTime = contestState.getRemainingTime();
                             long timeLeft = contestState.getTimeLeft();
@@ -412,6 +403,7 @@ public class MainActivity extends AppCompatActivity {
                             Log.e("state response", response.body().toString());
                             if ((presentTime - timeLeft) < remainingTime) {
                                 i = contestState.getIndex();
+                                getContest(contest.getContestId());
                                 duration = remainingTime - (presentTime - timeLeft);
                                 counter(duration);
                             } else {
@@ -446,6 +438,18 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                     else{
+                        userApiInterface.updateCountOfUser(getSharedPreferences("LoginCredentialsPref", MODE_PRIVATE).getString("userId", ""), contest.getContentCategory()).enqueue(new Callback<Boolean>() {
+                            @Override
+                            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
+                                Toast.makeText(MainActivity.this, "category updated!", Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onFailure(Call<Boolean> call, Throwable t) {
+
+                            }
+                        });
+                        getContest(contest.getContestId());
                         duration  = contest.getDurationOfContest()*1000L;
                         counter(duration);
                     }
@@ -535,12 +539,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        countDownTimer.cancel();
+        if(countDownTimer!=null)
+            countDownTimer.cancel();
         if(existsInLeaderboard) {
             ContestSave contestSave = new ContestSave();
             contestSave.setContestId(contest.getContestId());
             contestSave.setRemainingTime(currentTime);
-            contestSave.setContestStatus("completed");
+            contestSave.setContestStatus("not completed");
             contestSave.setIndex(i);
             contestSave.setUserId(userId);
             contestSave.setTimeLeft(new Date().getTime());
