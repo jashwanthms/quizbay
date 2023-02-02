@@ -10,7 +10,7 @@ public class LeaderBoardModel {
 	@SerializedName("timing")
 	private long timing;
 
-	@SerializedName("userName")
+	@SerializedName("userId")
 	private String userName;
 
 	public void setScore(int score){

@@ -2,7 +2,7 @@ package com.example.quizapp.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Status{
+public class GetUserContestState{
 
 	@SerializedName("index")
 	private int index;
@@ -51,7 +51,7 @@ public class Status{
 	@Override
  	public String toString(){
 		return 
-			"Status{" + 
+			"GetUserContestState{" + 
 			"index = '" + index + '\'' + 
 			",timeLeft = '" + timeLeft + '\'' + 
 			",remainingTime = '" + remainingTime + '\'' + 

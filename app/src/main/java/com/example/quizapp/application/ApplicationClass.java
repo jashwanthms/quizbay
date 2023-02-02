@@ -11,7 +11,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApplicationClass extends Application {
-    public Retrofit retrofit,userRetrofit,leaderBoardRetrofit;
+    public Retrofit retrofit,userRetrofit,leaderBoardRetrofit,registerRetrofit;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -20,9 +20,10 @@ public class ApplicationClass extends Application {
                 .create();
 
         userRetrofit=new Retrofit.Builder().addConverterFactory(GsonConverterFactory.create(gson)).baseUrl(Constants.USER_URL).client(new OkHttpClient()).build();
-
-
         retrofit=new Retrofit.Builder().addConverterFactory(GsonConverterFactory.create(gson)).baseUrl(Constants.BASE_URL).client(new OkHttpClient()).build();
         leaderBoardRetrofit=new Retrofit.Builder().addConverterFactory(GsonConverterFactory.create(gson)).baseUrl(Constants.LEADER_BASE_URL).client(new OkHttpClient()).build();
+        registerRetrofit=new Retrofit.Builder().addConverterFactory(GsonConverterFactory.create(gson)).baseUrl(Constants.REGISTER_URL).client(new OkHttpClient()).build();
+
+
     }
 }
