@@ -19,12 +19,13 @@
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="408dp"
-        android:layout_height="78dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/primary"
         android:gravity="center"
         android:text="Contests"
-        android:textColor="#AB3946BF"
-        android:textSize="24sp"
+        android:textColor="@color/secondary"
+        android:textSize="36sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/rv_contest"
         app:layout_constraintEnd_toEndOf="parent"

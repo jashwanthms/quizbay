@@ -21,6 +21,17 @@ public class ContestSave{
 	@SerializedName("remainingTime")
 	private long remainingTime;
 
+	@SerializedName("contestStatus")
+	private String contestStatus;
+
+	public String getContestStatus() {
+		return contestStatus;
+	}
+
+	public void setContestStatus(String contestStatus) {
+		this.contestStatus = contestStatus;
+	}
+
 	public void setIndex(int index){
 		this.index = index;
 	}
