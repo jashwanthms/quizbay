@@ -15,7 +15,7 @@ public class ContestSave{
 	@SerializedName("timeLeft")
 	private long timeLeft;
 
-	@SerializedName("ContestId")
+	@SerializedName("contestId")
 	private String contestId;
 
 	@SerializedName("remainingTime")

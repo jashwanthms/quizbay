@@ -8,10 +8,10 @@ public class GetUserContestState{
 	private int index;
 
 	@SerializedName("timeLeft")
-	private int timeLeft;
+	private long timeLeft;
 
 	@SerializedName("remainingTime")
-	private int remainingTime;
+	private long remainingTime;
 
 	@SerializedName("status")
 	private String status;
@@ -24,19 +24,19 @@ public class GetUserContestState{
 		return index;
 	}
 
-	public void setTimeLeft(int timeLeft){
+	public void setTimeLeft(long timeLeft){
 		this.timeLeft = timeLeft;
 	}
 
-	public int getTimeLeft(){
+	public long getTimeLeft(){
 		return timeLeft;
 	}
 
-	public void setRemainingTime(int remainingTime){
+	public void setRemainingTime(long remainingTime){
 		this.remainingTime = remainingTime;
 	}
 
-	public int getRemainingTime(){
+	public long getRemainingTime(){
 		return remainingTime;
 	}
 
