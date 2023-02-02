@@ -275,105 +275,14 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
     }
-    String userId = "ruth123";
+    String userId = "ruth001000";
 
     Boolean existsInLeaderboard;
 
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        mTextField=findViewById(R.id.timer_check);
-        questionView=findViewById(R.id.tv_question);
-        nextButton=findViewById(R.id.btn_next);
-        videoView=findViewById(R.id.video_question);
-        imageView=findViewById(R.id.img_question);
-        option1=findViewById(R.id.rd_option1);
-        option2=findViewById(R.id.rd_option2);
-        option3=findViewById(R.id.rd_option3);
-        option4=findViewById(R.id.rd_option4);
-        chOption1=findViewById(R.id.check_option1);
-        chOption2=findViewById(R.id.check_option2);
-        chOption3=findViewById(R.id.check_option3);
-        chOption4=findViewById(R.id.check_option4);
-        difficultyLevel=findViewById(R.id.tv_diff);
-        marks =findViewById(R.id.tv_mark);
-        radioGroup=findViewById(R.id.radiogroup);
-        layout=findViewById(R.id.check_linear);
-        playPause=findViewById(R.id.img_play);
-        image_linear=findViewById(R.id.image_linear);
-        video_linear=findViewById(R.id.video_linear);
-        audio_linear = findViewById(R.id.audio_linear);
-        imageQuestion = findViewById(R.id.image_text);
-        videoQuestion = findViewById(R.id.video_text);
-        audioQuestion = findViewById(R.id.audio_text);
-        progressBar=findViewById(R.id.progressBar_main);
-
-        apiInterFace=((ApplicationClass)getApplication()).retrofit.create(ApiInterFace.class);
-        userApiInterface = ((ApplicationClass) getApplication()).userRetrofit.create(UserApiInterface.class);
-        leaderApiInterFace= ((ApplicationClass) getApplication()).leaderBoardRetrofit.create(ApiInterFace.class);
-
-        Intent contestIntent = getIntent();
-        contest = (Contest) contestIntent.getSerializableExtra("newContest");
-        duration = contest.getDurationOfContest();
-
-        userApiInterface.getContestState(userId, contest.getContestId()).enqueue(new Callback<GetUserContestState>() {
-            @Override
-            public void onResponse(Call<GetUserContestState> call, Response<GetUserContestState> response) {
-                if(response.body() != null) {
-                    GetUserContestState contestState = response.body();
-                    if(contestState.getIndex() != -1) {
-                        long remainingTime = contestState.getRemainingTime();
-                        long timeLeft = contestState.getTimeLeft();
-                        long presentTime = new Date().getTime();
-                        Log.e("state response", response.body().toString());
-                        if ((presentTime - timeLeft) < remainingTime) {
-                            i = contestState.getIndex();
-                            duration = remainingTime - (presentTime - timeLeft);
-                        } else {
-                            Toast.makeText(MainActivity.this, "Time Up!", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(getApplicationContext(), ContestsActivity.class));
-                            finish();
-                        }
-                    }
-                }else{
-                    Log.e("state response null", "null state");
-                    //duration =  1000L;
-                }
-            }
-
-            @Override
-            public void onFailure(Call<GetUserContestState> call, Throwable t) {
-                Toast.makeText(MainActivity.this, t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                Log.i("save error", t.getLocalizedMessage());
-                //duration = contest.getDurationOfContest() * 1000L;
-            }
-        });
-
-        leaderApiInterFace.checkUserInLeaderBoard(userId, contest.getContestId()).enqueue(new Callback<Boolean>() {
-            @Override
-            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
-                existsInLeaderboard = response.body();
-                if(!existsInLeaderboard)
-                    getContest(contest.getContestId());
-                else{
-                    startActivity(new Intent(getApplicationContext(), LeaderBoard.class).putExtra("contestId", contest.getContestId()));
-                    finish();
-                }
-                Log.e("leader success", response.body().toString());
-            }
-
-            @Override
-            public void onFailure(Call<Boolean> call, Throwable t) {
-                Log.e("leader error", t.getLocalizedMessage());
-            }
-        });
-
-        mp=new MediaPlayer();
-
-        countDownTimer = new CountDownTimer(duration * 1000L, 1000) {
+    public void  counter(long duration){
+        countDownTimer = new CountDownTimer(duration, 1000) {
             public void onTick(long millisUntilFinished) {
                 mTextField.setText( ""+millisUntilFinished / 1000);
                 currentTime = millisUntilFinished;
@@ -413,6 +322,108 @@ public class MainActivity extends AppCompatActivity {
 //                }
             }
         }.start();
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        mTextField=findViewById(R.id.timer_check);
+        questionView=findViewById(R.id.tv_question);
+        nextButton=findViewById(R.id.btn_next);
+        videoView=findViewById(R.id.video_question);
+        imageView=findViewById(R.id.img_question);
+        option1=findViewById(R.id.rd_option1);
+        option2=findViewById(R.id.rd_option2);
+        option3=findViewById(R.id.rd_option3);
+        option4=findViewById(R.id.rd_option4);
+        chOption1=findViewById(R.id.check_option1);
+        chOption2=findViewById(R.id.check_option2);
+        chOption3=findViewById(R.id.check_option3);
+        chOption4=findViewById(R.id.check_option4);
+        difficultyLevel=findViewById(R.id.tv_diff);
+        marks =findViewById(R.id.tv_mark);
+        radioGroup=findViewById(R.id.radiogroup);
+        layout=findViewById(R.id.check_linear);
+        playPause=findViewById(R.id.img_play);
+        image_linear=findViewById(R.id.image_linear);
+        video_linear=findViewById(R.id.video_linear);
+        audio_linear = findViewById(R.id.audio_linear);
+        imageQuestion = findViewById(R.id.image_text);
+        videoQuestion = findViewById(R.id.video_text);
+        audioQuestion = findViewById(R.id.audio_text);
+        progressBar=findViewById(R.id.progressBar_main);
+
+        apiInterFace=((ApplicationClass)getApplication()).retrofit.create(ApiInterFace.class);
+        userApiInterface = ((ApplicationClass) getApplication()).userRetrofit.create(UserApiInterface.class);
+        leaderApiInterFace= ((ApplicationClass) getApplication()).leaderBoardRetrofit.create(ApiInterFace.class);
+
+        Intent contestIntent = getIntent();
+        contest = (Contest) contestIntent.getSerializableExtra("newContest");
+        duration = contest.getDurationOfContest()*1000L;
+
+        userApiInterface.getContestState(userId, contest.getContestId()).enqueue(new Callback<GetUserContestState>() {
+            @Override
+            public void onResponse(Call<GetUserContestState> call, Response<GetUserContestState> response) {
+                if(response.body() != null) {
+                    GetUserContestState contestState = response.body();
+                    if(contestState.getIndex() != -1) {
+                        long remainingTime = contestState.getRemainingTime();
+                        long timeLeft = contestState.getTimeLeft();
+                        long presentTime = new Date().getTime();
+                        Log.e("state response", response.body().toString());
+                        if ((presentTime - timeLeft) < remainingTime) {
+                            i = contestState.getIndex();
+                            duration = remainingTime - (presentTime - timeLeft);
+                            counter(duration);
+                        } else {
+                            Toast.makeText(MainActivity.this, "Time Up!", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(getApplicationContext(), ContestsActivity.class));
+                            finish();
+                        }
+                    }
+                    else{
+                        duration  = contest.getDurationOfContest()*1000L;
+                        counter(duration);
+                    }
+                }else{
+
+                    Log.e("state response null", "null state");
+                    //duration =  1000L;
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GetUserContestState> call, Throwable t) {
+                Toast.makeText(MainActivity.this, t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                Log.i("save error", t.getLocalizedMessage());
+                //duration = contest.getDurationOfContest() * 1000L;
+            }
+        });
+
+        leaderApiInterFace.checkUserInLeaderBoard(userId, contest.getContestId()).enqueue(new Callback<Boolean>() {
+            @Override
+            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
+                existsInLeaderboard = response.body();
+                if(!existsInLeaderboard)
+                    getContest(contest.getContestId());
+                else{
+                    startActivity(new Intent(getApplicationContext(), LeaderBoard.class).putExtra("contestId", contest.getContestId()));
+                    finish();
+                }
+                Log.e("leader success", response.body().toString());
+            }
+
+            @Override
+            public void onFailure(Call<Boolean> call, Throwable t) {
+                Log.e("leader error", t.getLocalizedMessage());
+            }
+        });
+
+        mp=new MediaPlayer();
+
+
 
 
 
@@ -463,7 +474,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         countDownTimer.cancel();
         ContestSave contestSave = new ContestSave();
-        contestSave.setContestId(thisContest.getContestId());
+        contestSave.setContestId(contest.getContestId());
         contestSave.setRemainingTime(currentTime);
         contestSave.setIndex(i);
         contestSave.setUserId(userId);
